@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+
+  # ── Backend (FastAPI / Flask) ────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wildfire_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./model:/app/model          # VAE model accessible from backend
+    environment:
+      - ENV=development
+      - MODEL_PATH=/app/model/outputs/best_model_checkpoint.pth
+    depends_on:
+      - db
+    networks:
+      - wildfire_net
+    restart: unless-stopped
+
+  # ── Frontend (React / Vue) ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: wildfire_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000   # change to backend URL in production
+    depends_on:
+      - backend
+    networks:
+      - wildfire_net
+    restart: unless-stopped
+
+  # ── Database (PostgreSQL) ─────────────────────────────────────────────────────
+  db:
+    image: postgis/postgis:15-3.3       # PostGIS for geospatial queries
+    container_name: wildfire_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: wildfire_db
+      POSTGRES_USER: wildfire_user
+      POSTGRES_PASSWORD: wildfire_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - wildfire_net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  wildfire_net:
+    driver: bridge
