@@ -8,7 +8,6 @@ A full-stack platform for satellite-based wildfire risk prediction using a Varia
 wildfire-risk-framework/
 ├── backend/          — FastAPI/Flask REST API + VAE inference
 ├── frontend/         — React/Vue dashboard + risk map visualisation
-├── model/            — VAE model (training, prediction, evaluation)
 └── docker-compose.yml
 ```
 
@@ -18,8 +17,8 @@ wildfire-risk-framework/
 |-------|-----------|
 | Backend | FastAPI / Flask (Python) |
 | Frontend | React / Vue |
-| ML Model | PyTorch VAE (7-band satellite input) |
-| Database | PostgreSQL + PostGIS |
+| ML Model | PyTorch VAE (court term) / ConvLSTM_GCN_Transformer(long term) |
+| Database | PostgreSQL + PostGIS + mongo DB |
 | Container | Docker + Docker Compose |
 
 ## Quick start
@@ -74,22 +73,6 @@ The VAE takes 7-band GeoTIFF images as input:
 | Aspect | Solar exposure |
 | Land Cover | Vegetation type |
 
-### Train the model
-
-```bash
-cd model
-pip install -r requirements.txt
-python -m src.train --data-dir data/raw --output-dir outputs --epochs 100
-```
-
-### Run inference
-
-```bash
-python -m src.predict \
-    --model  outputs/best_model_checkpoint.pth \
-    --image  data/raw/scene.tif \
-    --output predictions/
-```
 
 ## API endpoints (backend)
 
@@ -131,16 +114,6 @@ frontend/
 ├── package.json
 └── Dockerfile
 
-model/
-├── src/
-│   ├── dataset.py
-│   ├── model.py
-│   ├── metrics.py
-│   ├── train.py
-│   ├── predict.py
-│   └── evaluate.py
-└── configs/
-    └── default.yaml
 ```
 
 ## License
